@@ -1,0 +1,35 @@
+Loop to 255:
+	SR	0xFF	;0xFF is both the temporary memory location and loop target
+	PH
+	SR	0x00	;Initialize X register
+LOOP	ALR		;Save X register
+	JS	NEXTA	;Check if X register - 0xFF = 0x00
+NEXTA	JEL	END	;If it does, then jump to END
+	SR	0x01	;If it doesn't, then load X register from 0xFF and increment it
+	PH		;Note the push
+	LR	0xFF
+	JD	NEXTB	;Increment
+NEXTB	DEC		;Undo the push
+	JP	LOOP	;Repeat
+END	SR	0xFF	;Set all LEDS to on
+	PH
+	OT
+	JP 	END	;Jump to END
+
+Assembled:
+	02 FF
+	00
+	02 00
+	09
+	05 08
+	06 14
+	02 01
+	00
+	03 FF
+	04 11
+	0F
+	0A 05
+	02 FF
+	00
+	0D
+	0A 14
