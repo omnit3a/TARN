@@ -1,0 +1,72 @@
+Totally Awesome Retro Number-crunching (TARN) CPU Architecture
+
+The TARN CPU architecture is an eight bit CPU architecture focused on usage in hobbyist markets. 
+It uses a 16 opcode instruction set which is accessed through a four bit opcode bus, separate from the data bus.
+
+TARN uses an eight bit data bus, and an eight bit address bus. If the address bus was hooked up directly to 
+RAM, TARN would only be able to access 256 bytes of RAM. However, there is a 
+separate IORQ# which acts almost identically to the IORQ# line on the Z80 CPU, which the user of the CPU 
+may wire to act as a bank-switching-enable-line, theoretically allowing access to up to 65,536 bytes of RAM.
+
+TARN features an MREQ# Line that may be used as a chip select line for a memory IC. 
+This may be used in conjunction with the joined RD/WR# line to attach a memory IC to the CPU.
+
+There is a single clock line.
+
+There is a RESET# line, which may be pulled low to reinitialize the program counter and to zero the registers.
+
+There is a 128 byte stack built into the CPU, which is the main way of data secondary operand storage.
+In the case of a stack overflow, wrap the stack pointer around and store next value on bottom of stack.
+In the case of a stack underflow, wrap the stack pointer around and store next value on the top of the stack.
+
+Registers:
+	X: General purpose eight bit register.
+	Y: The value currently on top of the stack. Eight bit. Read only. 
+   	   For internal use only
+	PC: Keeps track of which instruction is currently being read. 16 
+    	   bit. For internal use only
+	SP: Keeps track of which byte is on top of the stack. Seven bit.     
+           For internal use only.
+       	
+
+Opcodes:
+PH	0x0:	Push value in X register onto the stack at the stack pointer.
+PP	0x1:	Pop value into X register.
+SR	0x2:	Load value on data bus into the X register.
+LR	0x3:	Load the value inside of the address specified on the data
+		bus into the X register. Pull MREQ# low and RD/WR# high.
+JD	0x4:	Add value in Y register to value in X register and store 
+		result in X register. If carry is set, jump to 
+                address specified on the data bus.
+JS	0x5:	Subtract value in Y register from the value in the 
+		X register (with borrow) and store sum in the 
+                X register. If borrow bit is set, jump to address 
+                specified on data bus.
+JEL	0x6:	If X register == 0x00 then jump to address specified on 
+		data bus.
+JEH	0x7:	If X register != 0x00 then jump to address specified on
+		data bus.
+NAND	0x8:	Bitwise NAND X register and Y register and store sum in X 
+		register.
+ALR	0x9:	Store value in X register in the address specified on the data bus.
+		Pull MREQ# low and pull RD/WR# low.
+JP	0xA:	Jump to address specified on the data bus.
+RR	0xB:	Rotate value in X register right by the amount of places 
+		specified in the Y register.
+INC	0xC:	Increment the stack pointer. Note, this does not affect the values in the stack.
+OT	0xD:	Pull IORQ# low and output value in Y register to the 
+		address bus.
+IT	0xE:	Pull IORQ# low and push value on data bus onto the stack.
+DEC	0xF:	Decrement the stack pointer. Note, this does not affect the values in the stack.
+
+Pinout
+1 to 8: Address lines zero to seven
+9 to 12: Opcode lines zero to three
+13: RESET#
+14: Ground
+15: +5 Volts
+16: MREQ#
+17: CLOCK
+18: RD/WR#
+19: IORQ#
+20 to 28: Data lines zero to seven
